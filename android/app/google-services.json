@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "916513331598",
+    "project_id": "lunova-474e2",
+    "storage_bucket": "lunova-474e2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:916513331598:android:a11f2668204ea4f5082cdf",
+        "android_client_info": {
+          "package_name": "com.example.lunova"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA7ONqTBLOHfVsfJ6eU2VeRQYJb97WXrg0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

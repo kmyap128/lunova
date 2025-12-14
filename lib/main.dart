@@ -1,4 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'page_add.dart';
 import 'page_collections.dart';
 import 'page_home.dart';
@@ -13,30 +19,20 @@ final List<Widget> bottomNavBarPages = [
   PageWardrobe(),
 ];
 
-void main() {
+void main() async {
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  FlutterNativeSplash.remove(); 
   runApp(const MainApp());
 }
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Lunova()
-    );
-  }
-}
-
-class Lunova extends StatefulWidget {
-  const Lunova({super.key});
-
-  @override
-  State<Lunova> createState() => _LunovaState();
-}
-
-class _LunovaState extends State<Lunova> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -68,9 +64,39 @@ class _LunovaState extends State<Lunova> {
             shadowColor: Colors.indigo,
         ),
       ),
-      home: Scaffold(
+      home: Lunova()
+      
+    );
+  }
+}
+
+class Lunova extends StatefulWidget {
+  const Lunova({super.key});
+
+  @override
+  State<Lunova> createState() => _LunovaState();
+}
+
+Future<void> addClothingItem(String category, String imageUrl) async {
+  await FirebaseFirestore.instance.collection('clothing_items').add({
+    'category': Category,
+    'imageUrl': imageUrl,
+    'createdAt': Timestamp.now(),
+  });
+}
+
+class _LunovaState extends State<Lunova> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
         appBar: AppBar(
-          leading: const Icon(Icons.nights_stay_outlined),
+          leading: Padding(
+            padding: const EdgeInsets.all(8.0), 
+            child: Image.asset(
+              'assets/media/logo.png',
+              fit: BoxFit.contain,
+            ),
+          ),
           title: const Text('Lunova'),
           actions: [
             IconButton(
@@ -112,15 +138,24 @@ class _LunovaState extends State<Lunova> {
           ],
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const PageAdd()),
-                );
-              },
+          onPressed: () async {
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const PageAdd()),
+            );
+
+            if (result != null && result is String) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(result),
+                  backgroundColor: Colors.green,
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            }
+          },
           child: const Icon(Icons.add),
         ),
-      ),
-    );
+      );
   }
 }
