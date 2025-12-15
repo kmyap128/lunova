@@ -11,7 +11,7 @@ import 'page_home.dart';
 import 'page_profile.dart';
 import 'page_wardrobe.dart';
 
-int currentBottomTab = 1;
+int currentBottomTab = 1;   // Set home page to default
 
 final List<Widget> bottomNavBarPages = [
   PageCollections(),
@@ -26,7 +26,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  FlutterNativeSplash.remove(); 
+  FlutterNativeSplash.remove();
   runApp(const MainApp());
 }
 
@@ -37,6 +37,9 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+
+      // ----- App Theme -----
+      
       theme: ThemeData(
           primarySwatch:  Colors.indigo,
           appBarTheme: const AppBarTheme(
@@ -70,6 +73,8 @@ class MainApp extends StatelessWidget {
   }
 }
 
+// ----- Main app widget-----
+
 class Lunova extends StatefulWidget {
   const Lunova({super.key});
 
@@ -77,18 +82,13 @@ class Lunova extends StatefulWidget {
   State<Lunova> createState() => _LunovaState();
 }
 
-Future<void> addClothingItem(String category, String imageUrl) async {
-  await FirebaseFirestore.instance.collection('clothing_items').add({
-    'category': Category,
-    'imageUrl': imageUrl,
-    'createdAt': Timestamp.now(),
-  });
-}
-
 class _LunovaState extends State<Lunova> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
+      // ----- Navigation bar -----
+
         appBar: AppBar(
           leading: Padding(
             padding: const EdgeInsets.all(8.0), 
@@ -110,6 +110,9 @@ class _LunovaState extends State<Lunova> {
             ),
           ],
         ),
+
+      // ----- App body -----
+
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: bottomNavBarPages[currentBottomTab],
@@ -137,22 +140,14 @@ class _LunovaState extends State<Lunova> {
             ),
           ],
         ),
+
+        // Floating "+" button in bottom right corner
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
-            final result = await Navigator.push(
+            Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const PageAdd()),
             );
-
-            if (result != null && result is String) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(result),
-                  backgroundColor: Colors.green,
-                  duration: const Duration(seconds: 2),
-                ),
-              );
-            }
           },
           child: const Icon(Icons.add),
         ),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'page_add.dart';
 
+// ----- Collections Page -----
+// displays collections of outfits
 class PageCollections extends StatefulWidget {
   const PageCollections({super.key});
 
@@ -15,6 +17,7 @@ class _PageCollectionsState extends State<PageCollections> {
     return Scaffold(
       appBar: AppBar(title: const Text('Collections')),
       body: StreamBuilder<QuerySnapshot>(
+        // grab database snapshot
         stream: FirebaseFirestore.instance
             .collection('collections')
             .orderBy('createdAt', descending: true)
@@ -33,14 +36,16 @@ class _PageCollectionsState extends State<PageCollections> {
             );
           }
 
-          final collections = snapshot.data!.docs;
+          final collections = snapshot.data!.docs;  // populate collections
 
+          // display list of collections
           return ListView.builder(
             itemCount: collections.length,
             itemBuilder: (context, index) {
               final data =
                   collections[index].data() as Map<String, dynamic>;
 
+              // card to display collection
               return Card(
                 margin: const EdgeInsets.all(12),
                 shape: RoundedRectangleBorder(
@@ -54,6 +59,7 @@ class _PageCollectionsState extends State<PageCollections> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  // display how many outfits are in the collection
                   subtitle: Text(
                     '${(data['outfitIds'] as List).length} outfits',
                   ),
@@ -81,6 +87,8 @@ class _PageCollectionsState extends State<PageCollections> {
   }
 }
 
+// page to display collection items and info
+// displays when clicking into a collection
 class CollectionDetailPage extends StatelessWidget {
   final String collectionId;
   final String collectionName;
@@ -98,6 +106,7 @@ class CollectionDetailPage extends StatelessWidget {
     if (outfitIds.isEmpty) {
       return Scaffold(
         appBar: AppBar(title: Text(collectionName)),
+        // display grid of outfits
         body: GridView.builder(
           padding: const EdgeInsets.all(12),
           gridDelegate:
@@ -108,6 +117,8 @@ class CollectionDetailPage extends StatelessWidget {
           ),
           itemCount: 1,
           itemBuilder: (context, index) {
+            // tile to add an outfit from the collections page
+            // navigates to "Add page"
             return _AddOutfitTile(context);
           },
         ),
@@ -117,6 +128,7 @@ class CollectionDetailPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(collectionName)),
       body: StreamBuilder<QuerySnapshot>(
+        // grab database snapshot of outfits collection
         stream: FirebaseFirestore.instance
             .collection('outfits')
             .where(FieldPath.documentId, whereIn: outfitIds)
@@ -130,8 +142,9 @@ class CollectionDetailPage extends StatelessWidget {
             return const Center(child: Text('No outfits found.'));
           }
 
-          final outfits = snapshot.data!.docs;
+          final outfits = snapshot.data!.docs;  // populate outfits
 
+          // build grid of outfits in the collection
           return GridView.builder(
             padding: const EdgeInsets.all(12),
             gridDelegate:
@@ -183,6 +196,7 @@ class CollectionDetailPage extends StatelessWidget {
     );
   }
 
+  // build the collage of images on outfit preview card
   Widget _buildOutfitPreview(List<String> itemIds) {
     if (itemIds.isEmpty) {
       return const Center(child: Text('No items'));
@@ -223,6 +237,7 @@ class CollectionDetailPage extends StatelessWidget {
     );
   }
 
+  // Widget tile to navigate to the Add page
   Widget _AddOutfitTile(BuildContext context) {
     return GestureDetector(
       onTap: () {

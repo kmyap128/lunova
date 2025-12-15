@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 
 
-// Home Page
+// ----- Home Page -----
 // contains a dashboard overview outfit of the day and of 
 // recently added outfits and clothing items
 class PageHome extends StatefulWidget {
@@ -27,7 +27,9 @@ class _PageHomeState extends State<PageHome> {
             ),
           ),
           SizedBox(height: 8),
-          // Outfit of the Day section
+
+          // ----- Outfit of the Day -----
+
           SizedBox(
             height: 350,
             child: StreamBuilder<QuerySnapshot>(
@@ -46,6 +48,7 @@ class _PageHomeState extends State<PageHome> {
                       color: Colors.indigo.shade100,
                       borderRadius: BorderRadius.circular(16),
                     ),
+                    // if there are no outfits added yet
                     child: const Center(
                       child: Text(
                         'No outfits yet',
@@ -56,19 +59,27 @@ class _PageHomeState extends State<PageHome> {
                 }
 
                 final outfits = snapshot.data!.docs;
-                outfits.shuffle(); // 🎲 random outfit
-                final outfit = outfits.first;
+                outfits.shuffle(); 
+                final outfit = outfits.first;   // choose a random outfit to display as outfit of the day
                 final data = outfit.data() as Map<String, dynamic>;
 
+                // main container to display outfit
                 return Container(
                   margin: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: _OutfitPreviewCard(
-                    name: data['name'],
-                    itemIds: List<String>.from(data['itemIds']),
-                    large: true,
+                  child: GestureDetector(
+                    onTap: () => _showOutfitDialog(
+                      context,
+                      data['name'],
+                      List<String>.from(data['itemIds']),
+                    ),
+                    child: _OutfitPreviewCard(
+                      name: data['name'],
+                      itemIds: List<String>.from(data['itemIds']),
+                      large: true,
+                    ),
                   ),
                 );
               },
@@ -76,7 +87,9 @@ class _PageHomeState extends State<PageHome> {
           ),
 
           SizedBox(height: 8),
-          // Recently Added Clothing Items section
+
+          // ----- Recently Added Clothing Items -----
+
           Text(
             'Recently Added Clothing Items',
             style: TextStyle(
@@ -88,9 +101,10 @@ class _PageHomeState extends State<PageHome> {
           SizedBox(
             height: 180,
             child: StreamBuilder<QuerySnapshot>(
+              // grab the 5 most recently added items
               stream: FirebaseFirestore.instance
                   .collection('clothing_items')
-                  .orderBy('createdAt', descending: true)
+                  .orderBy('createdAt', descending: true)   
                   .limit(5)
                   .snapshots(),
               builder: (context, snapshot) {
@@ -104,26 +118,31 @@ class _PageHomeState extends State<PageHome> {
 
                 final docs = snapshot.data!.docs;
 
+                // scrollable list of items
                 return ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: docs.length,
                   itemBuilder: (context, index) {
                     final data = docs[index].data() as Map<String, dynamic>;
-
+                    
                     return Container(
                       margin: const EdgeInsets.all(8),
                       width: 150,
-                      child: Card(
-                        elevation: 6,
-                        shadowColor: Colors.black54,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
-                          child: Image.network(
-                            data['imageUrl'],
-                            fit: BoxFit.cover,
+                      child: GestureDetector(
+                        onTap: () => _showClothingDialog(context, data),
+                        // clothing item card
+                        child: Card(
+                          elevation: 6,
+                          shadowColor: Colors.black54,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: Image.network(
+                              data['imageUrl'],
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
                       ),
@@ -135,7 +154,8 @@ class _PageHomeState extends State<PageHome> {
           ),
 
           SizedBox(height: 8),
-          // Recently Added Outfits section
+
+          // ----- Recently Added Outfits -----
           Text(
             'Recently Added Outfits',
             style: TextStyle(
@@ -147,6 +167,7 @@ class _PageHomeState extends State<PageHome> {
           SizedBox(
             height: 180,
             child: StreamBuilder<QuerySnapshot>(
+              // grab the 5 most recently added outfits
               stream: FirebaseFirestore.instance
                   .collection('outfits')
                   .orderBy('createdAt', descending: true)
@@ -172,9 +193,17 @@ class _PageHomeState extends State<PageHome> {
                     return Container(
                       margin: const EdgeInsets.all(8),
                       width: 150,
-                      child: _OutfitPreviewCard(
-                        name: data['name'],
-                        itemIds: List<String>.from(data['itemIds']),
+                      // Card to display outfit
+                      child: GestureDetector(
+                        onTap: () => _showOutfitDialog(
+                          context,
+                          data['name'],
+                          List<String>.from(data['itemIds']),
+                        ),
+                        child: _OutfitPreviewCard(
+                          name: data['name'],
+                          itemIds: List<String>.from(data['itemIds']),
+                        ),
                       ),
                     );
                   },
@@ -188,6 +217,8 @@ class _PageHomeState extends State<PageHome> {
   }
 }
 
+// Card container for an outfit
+// displays a collage of clothing items in the outfit
 class _OutfitPreviewCard extends StatelessWidget {
   final String name;
   final List<String> itemIds;
@@ -234,12 +265,14 @@ class _OutfitPreviewCard extends StatelessWidget {
     );
   }
 
+  // builds the collage of clothing items displayed in the outfit preview card
   Widget _buildImageGrid() {
     if (itemIds.isEmpty) {
       return const Center(child: Text('No items'));
     }
 
     return StreamBuilder<QuerySnapshot>(
+      // grab snapshot of clothing items in database at this point
       stream: FirebaseFirestore.instance
           .collection('clothing_items')
           .where(FieldPath.documentId,
@@ -255,10 +288,11 @@ class _OutfitPreviewCard extends StatelessWidget {
         return GridView.builder(
           physics: const NeverScrollableScrollPhysics(),
           padding: EdgeInsets.zero,
+          // make the grid have 2 columns
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
           ),
-          itemCount: items.length.clamp(0, 4),
+          itemCount: items.length.clamp(0, 4),    // limit to 4 items
           itemBuilder: (context, index) {
             final data =
                 items[index].data() as Map<String, dynamic>;
@@ -272,4 +306,85 @@ class _OutfitPreviewCard extends StatelessWidget {
       },
     );
   }
+}
+
+// dialogue box that shows up when you click on clothing item
+void _showClothingDialog(BuildContext context, Map<String, dynamic> data) {
+  showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: Text('Category: ${data['category']}'),
+      content: Image.network(
+        data['imageUrl'],
+        fit: BoxFit.cover,
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Close'),
+        ),
+      ],
+    ),
+  );
+}
+
+// dialogue box that shows up when you click on an outfit
+void _showOutfitDialog(
+  BuildContext context,
+  String name,
+  List<String> itemIds,
+) {
+  showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: Text(name),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: StreamBuilder<QuerySnapshot>(
+          // grab snapshot of database at this instance
+          stream: FirebaseFirestore.instance
+              .collection('clothing_items')
+              .where(FieldPath.documentId, whereIn: itemIds)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            final items = snapshot.data!.docs;
+
+            // display grid of clothing items in this outfit
+            return GridView.builder(
+              shrinkWrap: true,
+              gridDelegate:
+                  const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+              ),
+              itemCount: items.length,
+              itemBuilder: (context, index) {
+                final data =
+                    items[index].data() as Map<String, dynamic>;
+
+                return ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.network(
+                    data['imageUrl'],
+                    fit: BoxFit.cover,
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Close'),
+        ),
+      ],
+    ),
+  );
 }

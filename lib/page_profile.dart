@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+// ----- Profile Page -----
+// displays user name and a count of clothing items, outfits, and collections
 class PageProfile extends StatefulWidget {
   const PageProfile({super.key});
 
@@ -20,6 +22,7 @@ class _PageProfileState extends State<PageProfile> {
   }
 
   Future<void> _fetchCounts() async {
+    // grab data collections from database
     final clothingSnapshot =
         await FirebaseFirestore.instance.collection('clothing_items').get();
     final outfitSnapshot =
@@ -27,6 +30,7 @@ class _PageProfileState extends State<PageProfile> {
     final collectionSnapshot =
         await FirebaseFirestore.instance.collection('collections').get();
 
+    // get the count of items in each collection
     setState(() {
       clothingCount = clothingSnapshot.docs.length;
       outfitCount = outfitSnapshot.docs.length;
@@ -34,6 +38,7 @@ class _PageProfileState extends State<PageProfile> {
     });
   }
 
+  // ----- Profile screen -----
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,7 +62,7 @@ class _PageProfileState extends State<PageProfile> {
               ),
             ),
             const SizedBox(height: 16),
-            // Name
+            // Name 
             const Text(
               'Jane Doe',
               style: TextStyle(
@@ -81,6 +86,7 @@ class _PageProfileState extends State<PageProfile> {
     );
   }
 
+  // Widget to build the stat card
   Widget _buildStatCard(String label, int count) {
     return Column(
       children: [

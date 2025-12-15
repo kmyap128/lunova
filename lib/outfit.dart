@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lunova/clothing_item.dart';
 
+// Class representing an outfit
 class Outfit {
   final String id;
   final String name;
-  final List<ClothingItem> items; // full objects
+  final List<ClothingItem> items; // reference clothing item class
   final DateTime createdAt;
 
   Outfit({
@@ -34,7 +35,4 @@ class Outfit {
       'createdAt': createdAt,
     };
   }
-
-  // Helper to get a representative image (e.g., first clothing item)
-  String get representativeImage => items.isNotEmpty ? items[0].imageUrl : '';
 }

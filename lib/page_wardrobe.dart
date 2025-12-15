@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-// Wardrobe Page
+// ----- Wardrobe Page -----
 // displays a grid of clothing items
 class PageWardrobe extends StatefulWidget {
   const PageWardrobe({super.key});
@@ -13,6 +13,7 @@ class PageWardrobe extends StatefulWidget {
 class _PageWardrobeState extends State<PageWardrobe>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+
 
   @override
   void initState() {
@@ -26,6 +27,7 @@ class _PageWardrobeState extends State<PageWardrobe>
     super.dispose();
   }
 
+  // Dialogue box to display clothing item data
   void _showClothingDialog(Map<String, dynamic> data) {
     showDialog(
       context: context,
@@ -47,6 +49,7 @@ class _PageWardrobeState extends State<PageWardrobe>
     );
   }
 
+  // Widget to build grid displaying clothing items
   Widget _buildClothingGrid() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
@@ -76,6 +79,7 @@ class _PageWardrobeState extends State<PageWardrobe>
           itemBuilder: (context, index) {
             final data = docs[index].data() as Map<String, dynamic>;
 
+            // ----- clothing item card -----
             return GestureDetector(
               onTap: () => _showClothingDialog(data),
               child: Card(
@@ -98,6 +102,7 @@ class _PageWardrobeState extends State<PageWardrobe>
     );
   }
 
+  // Widget to build the collage of clothing images on the outfit preview card
   Widget _buildOutfitPreview(List<String> itemIds) {
     if (itemIds.isEmpty) {
       return const Center(child: Text('No items'));
@@ -135,6 +140,7 @@ class _PageWardrobeState extends State<PageWardrobe>
     );
   }
 
+  // Widget to build the grid displaying outfits
   Widget _buildOutfitsGrid() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
@@ -172,6 +178,7 @@ class _PageWardrobeState extends State<PageWardrobe>
                   List<String>.from(outfit['itemIds']),
                 );
               },
+              // ----- outfit card -----
               child: Card(
                 elevation: 4,
                 shape: RoundedRectangleBorder(
@@ -208,6 +215,7 @@ class _PageWardrobeState extends State<PageWardrobe>
     );
   }
 
+  // Dialogue box to display clothing items in an outfit
   void _showOutfitDialog(
     BuildContext context,
     String outfitName,
@@ -220,6 +228,7 @@ class _PageWardrobeState extends State<PageWardrobe>
           title: Text(outfitName),
           content: SizedBox(
             width: double.maxFinite,
+            // grab database snapshot
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('clothing_items')
@@ -272,6 +281,7 @@ class _PageWardrobeState extends State<PageWardrobe>
     );
   }
 
+  // ----- Build Wardrobe page content -----
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -282,6 +292,7 @@ class _PageWardrobeState extends State<PageWardrobe>
           labelColor: Colors.indigo,
           unselectedLabelColor: Colors.grey,
           indicatorColor: Colors.indigo,
+          // tab bar to switch between clothing and outfits screens
           tabs: const [
             Tab(text: 'Clothing'),
             Tab(text: 'Outfits'),
